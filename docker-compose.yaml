@@ -20,7 +20,7 @@ services:
         - traefik.enable=true
         ## HTTP Routers
         - traefik.http.routers.test_hyeon.entrypoints=websecure
-        - traefik.http.routers.test_hyeon.rule=Host(`test.hyeon.pro`)
+        - traefik.http.routers.test_hyeon.rule=Host(`test.nas.hyeon.pro`)
         - traefik.http.routers.test_hyeon.tls.certresolver=leresolver
         - traefik.http.services.test_hyeon.loadbalancer.server.port=80
   wordpress:
