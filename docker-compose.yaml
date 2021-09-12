@@ -36,6 +36,6 @@ services:
 networks:
   default:
     external:
-      name: db_net
+      name: DB_net
 volumes:
   wordpress:
