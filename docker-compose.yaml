@@ -1,0 +1,41 @@
+#####################################
+# Local Development
+#####################################
+version: "3.8"
+
+########################### SERVICES
+services:
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./docker/nginx/conf:/etc/nginx/conf.d
+      - wordpress:/var/www/html
+    ports:
+      - 8080:80
+    links:
+      - wordpress
+  wordpress:
+    image: ghcr.io/hansanghyeon/wordpress-redis:v1.0.0
+    environment:
+      WORDPRESS_DB_HOST: mariadb:3306
+      WORDPRESS_DB_NAME: test
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: 1
+      WORDPRESS_CONFIG_EXTRA: |
+        /* Redis */
+        define('WP_REDIS_HOST', getenv_docker('WORDPRESS_REDIS_HOST', 'redis'));
+        define('WP_REDIS_PORT', getenv_docker('WORDPRESS_REDIS_PORT', 6379));
+
+    external_links:
+      - DB__wordpress:mariadb
+      - DB__redis:redis
+    volumes:
+      - wordpress:/var/www/html
+
+########################### NETWORKS
+networks:
+  default:
+    external:
+      name: db_net
+volumes:
+  wordpress:

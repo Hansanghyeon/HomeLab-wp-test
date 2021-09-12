@@ -1,0 +1,54 @@
+#####################################
+# swarm에서 작동하는 docker-compose
+#####################################
+version: "3.8"
+
+########################### SERVICES
+services:
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./docker/nginx/conf:/etc/nginx/conf.d
+      - wordpress:/var/www/html
+    links:
+      - wordpress
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == ${HOSTNAME}
+      labels:
+        - traefik.enable=true
+        ## HTTP Routers
+        - traefik.http.routers.hyeon.entrypoints=websecure
+        - traefik.http.routers.hyeon.rule=Host(`test.hyeon.pro`)
+        - traefik.http.routers.hyeon.tls.certresolver=leresolver
+        - traefik.http.services.hyeon.loadbalancer.server.port=80
+  wordpress:
+    image: ghcr.io/hansanghyeon/wordpress-redis:v1.0.0
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: DB_mariadb:3306
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+      WORDPRESS_CONFIG_EXTRA: |
+        /* Redis */
+        define('WP_REDIS_HOST', getenv_docker('WORDPRESS_REDIS_HOST', 'redis'));
+        define('WP_REDIS_PORT', getenv_docker('WORDPRESS_REDIS_PORT', 6379));
+    volumes:
+      - wordpress:/var/www/html
+      - ./data:/var/www/html/wp-content
+      - ./Theme:/var/www/html/wp-content/themes/sage
+      - ./backup:/var/www/html/wp-content/ai1wm-backups
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == ${HOSTNAME}
+
+########################### NETWORKS
+networks:
+  default:
+    external:
+      name: DB_net
+volumes:
+  wordpress:
