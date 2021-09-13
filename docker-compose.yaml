@@ -10,8 +10,6 @@ services:
     volumes:
       - ./docker/nginx/conf:/etc/nginx/conf.d
       - wordpress:/var/www/html
-    links:
-      - wordpress
     deploy:
       mode: replicated
       replicas: 1
